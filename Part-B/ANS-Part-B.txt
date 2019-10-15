@@ -1,0 +1,61 @@
+[Part B]
+
+[1] congestion window size
+flow 1)
+  size: 74
+  size: 13716
+  size: 28766
+  size: 48448
+  size: 66616
+  size: 98410
+  size: 133232
+  size: 202876
+  size: 272520
+  size: 219820
+
+flow 2)
+  size: 74
+  size: 13716
+  size: 28766
+  size: 48448
+  size: 66616
+  size: 99924
+  size: 149886
+  size: 202876
+  size: 305828
+  size: 408780
+
+flow 3)
+  size: 13856
+  size: 78728
+  size: 168054
+  size: 354276
+  size: 716122
+  size: 1059800
+  size: 6056
+  size: 1250564
+  size: 1277816
+  size: 1280844
+
+My algorithm of estimating congestion window is record sum all packet size within 1 RTT.
+We get RTT values from part A, and we can use that to do the estimation. Congestion window
+is a value of maximum packet that can send from sender. We can calculate how many bytes
+sent within RTT, because that is highly related to congestion window. The code section
+is in analysis_pcap_tcp.cpp part b function.
+We can see that congestion window grows multiplicativly in all flows. Though it is not
+factor of 2.
+
+
+[2] retransmission and dup ACK
+flow 1)
+  0 packet retransmissions
+  1 packet timeout
+flow 2)
+  173 packet retransmissions
+  4 packet timeout
+flow 3)
+  407 packet retransmissions
+  95 packet timeout
+
+Retransmission are calculate as receiver ACK same sequence number over 3 times.
+Code section is part_b_2() in analysis_pcap_tcp.cpp.

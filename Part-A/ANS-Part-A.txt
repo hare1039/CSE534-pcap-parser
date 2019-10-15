@@ -1,0 +1,62 @@
+[Part A]
+i) high level view of analysis_pcap_tcp.cpp
+
+ `def.hpp` contains some utility functions like `readnet()`.
+ In analysis_pcap_tcp, first read "./assignment2.pcap" using libpcap.
+ Next, parse pcap packet into `tcp_packet`, which is compose of
+ {pcap_header, ethernet_frame, ip_datagram, tcp_segment}.
+ class question_* are solvers. Please start reading from `main()` function.
+
+ii) analysis_pcap_tcp.cpp
+
+iii)
+ [Q1] 3 TCP flows initiated from sender(130.245.145.12)
+
+ [Q2]
+  For Sequence number and Ack number, just parse from tcp header. For window size,
+  except the first 2 window size, other window size uses TCP Window Scale Option
+  to specify the scale factor. This calculated window size are show as CWD in [A].
+
+  Throughput:  I defined as total byte sent devided by total time.
+  Loss rate:   I collect all packets sent by sender, and check whether there are any retransmition.
+  Average RTT: Calculate time between first packet send and ACK.
+
+  [flow #1]
+   [A]
+    130.245.145.12:43502 -> 128.208.2.198:80; SEQ:2558634629; ACK:         0; WND: 42340; SYN;
+    128.208.2.198:80 -> 130.245.145.12:43502; SEQ:3429921722; ACK:2558634630; WND: 43440; SYN; ACK;
+    130.245.145.12:43502 -> 128.208.2.198:80; SEQ:2558634630; ACK:3429921723; WND:     3; ACK;      CWD:49152;
+    130.245.145.12:43502 -> 128.208.2.198:80; SEQ:2558634630; ACK:3429921723; WND:     3; PSH; ACK; CWD:49152;
+   [B] throughput:  1522737.837838 bytes/s
+   [C] packet lost: 0.000844 %
+   [D] average RTT: 72.399123 ms
+       Theoretical throughput using fomular: "(sqrt(3/2) * MSS) / (sqrt(p) * RTT)"
+       (sqrt(3/2) * 1460) / (sqrt(0.00000844) * 0.072399123) = 8501468.62849
+
+  [flow #2]
+   [A]
+    130.245.145.12:43498 -> 128.208.2.198:80; SEQ: 705669102; ACK:         0; WND: 42340; SYN;
+    128.208.2.198:80 -> 130.245.145.12:43498; SEQ:1921750143; ACK: 705669103; WND: 43440; SYN; ACK;
+    130.245.145.12:43498 -> 128.208.2.198:80; SEQ: 705669103; ACK:1921750144; WND:     3; ACK;      CWD:49152;
+    130.245.145.12:43498 -> 128.208.2.198:80; SEQ: 705669103; ACK:1921750144; WND:     3; PSH; ACK; CWD:49152;
+   [B] throughput:  5388021.890547 bytes/s
+   [C] packet lost: 0.000360 % packet lost
+   [D] average RTT: 67.748850 ms
+       Theoretical throughput using fomular: "(sqrt(3/2) * MSS) / (sqrt(p) * RTT)"
+       (sqrt(3/2) * 1460) / (sqrt(0.00000360) * 0.067748850) = 13910582.2103
+
+  [flow #3]
+   [A]
+    130.245.145.12:43500 -> 128.208.2.198:80; SEQ:3636173851; ACK:         0; WND: 42340; SYN;
+    128.208.2.198:80 -> 130.245.145.12:43500; SEQ:2335809727; ACK:3636173852; WND: 43440; SYN; ACK;
+    130.245.145.12:43500 -> 128.208.2.198:80; SEQ:3636173852; ACK:2335809728; WND:     3; ACK;      CWD:49152;
+    130.245.145.12:43500 -> 128.208.2.198:80; SEQ:3636173852; ACK:2335809728; WND:     3; PSH; ACK; CWD:49152;
+   [B] throughput:  1323286.057692 bytes/s
+   [C] packet lost: 0.008028 %
+   [D] average RTT: 121.837180 ms
+       Theoretical throughput using fomular: "(sqrt(3/2) * MSS) / (sqrt(p) * RTT)"
+       (sqrt(3/2) * 1460) / (sqrt(0.00008028) * 0.121837180) = 1638004.02646
+
+  [Part D explanation] we can see all "Theoretical throughput" are greater to "real throughput"
+                       This maybe caused by different implementation of TCP congestion window
+                       when this pcap is sniffed.
